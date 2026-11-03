@@ -247,7 +247,7 @@ function homeView() {
   </div>
   <h3>Emergency numbers</h3>
   <table>${NUMBERS.map(([w, n]) => `<tr><td>${w}</td><td><b>${n}</b></td></tr>`).join("")}</table>
-  <p class="footer">Everything here works without signal once the app has loaded once. It's a reference, not a replacement for a first aid course. When in doubt, call for help. Based on Red Cross, European Resuscitation Council, WHO and CDC guidance.</p>`;
+  <p class="footer">Everything here works without signal once the app has loaded once. It's a reference, not a replacement for a first aid course. When in doubt, call for help. Based on Red Cross, European Resuscitation Council, WHO and CDC guidance. <span id="app-version"></span></p>`;
 }
 
 function guidesView() {
@@ -459,6 +459,7 @@ function wire() {
 
   wirePdf();
   wireAsk();
+  showVersion();
 
   const form = $("#med-form");
   if (form) form.onsubmit = (e) => {
@@ -546,8 +547,28 @@ document.addEventListener("visibilitychange", () => {
 render();
 
 // ---------- offline ----------
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => {
-    $("#offline-badge").hidden = false;
+function showVersion() {
+  if (!("caches" in window)) return;
+  caches.keys().then((k) => {
+    const v = k.filter((x) => x.startsWith("ek-v")).sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4))).pop();
+    const el = $("#app-version"); if (el && v) el.textContent = `Version ${v.replace("ek-v", "")}`;
   }).catch(() => {});
+}
+if ("serviceWorker" in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+    reg.update().catch(() => {});
+    return navigator.serviceWorker.ready;
+  }).then(() => { $("#offline-badge").hidden = false; showVersion(); }).catch(() => {});
+
+  // A new version has taken over: reload to show it, unless an SOS tool is running.
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloading) return;
+    if (signal.running || !$("#metro").hidden || torchOn) {
+      const b = $("#offline-badge"); b.hidden = false; b.textContent = "Update ready: reopen app";
+      return;
+    }
+    reloading = true; location.reload();
+  });
 }
