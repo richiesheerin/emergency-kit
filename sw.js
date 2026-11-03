@@ -1,9 +1,12 @@
 // Caches the whole app on first load so it works with no signal.
 // Bump VERSION whenever any file changes so phones pick up the update.
-const VERSION = "ek-v4";
+importScripts("diagrams.js"); // defines DIAGRAMS, so every diagram image is cached for offline use
+const VERSION = "ek-v5";
 const FILES = [
   "./", "./index.html", "./app.css", "./app.js", "./content.js", "./manifest.webmanifest",
   "./icon.svg", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png",
+  "./diagrams.js",
+  ...Object.values(DIAGRAMS).flat().map((d) => "./" + d.file),
 ];
 
 self.addEventListener("install", (e) => {

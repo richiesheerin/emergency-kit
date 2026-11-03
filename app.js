@@ -321,12 +321,23 @@ async function wirePdf() {
   };
 }
 
+function diagramsHtml(id) {
+  const list = (typeof DIAGRAMS !== "undefined" && DIAGRAMS[id]) || [];
+  return list.map((d) => `<figure class="diagram">
+      <a class="zoom" href="${d.file}" target="_blank" rel="noopener" aria-label="Open full-size diagram">
+        <img src="${d.file}" alt="${esc(d.alt)}" loading="lazy"></a>
+      <figcaption>${esc(d.caption || "")}<span class="small credit">Tap to enlarge · Diagram: ${esc(d.author)},
+        <a href="${d.licenceUrl}" target="_blank" rel="noopener">${esc(d.licence)}</a>, via
+        <a href="${d.source}" target="_blank" rel="noopener">Wikimedia Commons</a>${d.changes ? ` (${esc(d.changes.replace(/\.$/, "").toLowerCase())})` : ""}</span></figcaption>
+    </figure>`).join("");
+}
+
 function guideView(id) {
   const g = byId[id]; if (!g) return homeView();
   setTab("guides");
   const sibs = GUIDES.filter((x) => x.cat === g.cat), i = sibs.indexOf(g), next = sibs[i + 1];
   return `<div class="crumb"><a href="#cat/${g.cat}">${catById[g.cat].title}</a></div>
-    <h2>${g.title}</h2>${g.body}
+    <h2>${g.title}</h2>${diagramsHtml(g.id)}${g.body}
     <div class="panel ask" id="ask-ai" data-guide="${g.id}">
       <h3>Ask AI about this</h3>
       <p class="small">Sends this guide plus your question to your offline AI app (e.g. PocketPal), so it answers from this checked text instead of from memory.</p>

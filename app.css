@@ -120,6 +120,11 @@ input.f, textarea.f, select.f {
 textarea.f { min-height: 70px; }
 .medcard dt { color: var(--muted); font-size: .85rem; margin-top: 8px; }
 .medcard dd { margin: 0; font-size: 1.1rem; font-weight: 600; }
+figure.diagram { margin: 12px 0 18px; }
+figure.diagram a.zoom { display: block; background: #fff; border-radius: 12px; padding: 8px; }
+figure.diagram img { display: block; width: 100%; height: auto; }
+figure.diagram figcaption { margin-top: 6px; font-size: .95rem; }
+figure.diagram .credit { display: block; margin-top: 2px; }
 .panel.ask { margin-top: 24px; border-color: #3d3d6b; }
 .panel.ask h3 { color: #9fa8ff; }
 .footer { color: var(--muted); font-size: .85rem; margin-top: 28px; }
