@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Emergency Kit</title>
+<meta name="description" content="Offline first aid, water, knots and SOS tools.">
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Emergency">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <a href="#home" class="brand" aria-label="Home"><span class="cross" aria-hidden="true"></span>Emergency Kit</a>
+  <span id="offline-badge" class="badge" hidden>Saved for offline</span>
+</header>
+
+<div class="search-wrap">
+  <input id="search" type="search" placeholder="Search: bleeding, bowline, boil, SOS…" autocomplete="off" aria-label="Search guides">
+</div>
+
+<main id="view" tabindex="-1"></main>
+
+<nav class="tabs" aria-label="Sections">
+  <a href="#home" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg>Home</a>
+  <a href="#guides" data-tab="guides"><svg viewBox="0 0 24 24"><path d="M4 4h7v16H4zM13 4h7v16h-7z"/></svg>Guides</a>
+  <a href="#tools" data-tab="tools"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>SOS tools</a>
+  <a href="#me" data-tab="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z"/></svg>My info</a>
+</nav>
+
+<div id="flash" class="flash" hidden>
+  <div class="flash-msg"><span id="flash-text">SOS</span><small>Tap anywhere to stop</small></div>
+</div>
+
+<div id="metro" class="metro" hidden>
+  <div class="metro-inner">
+    <div class="metro-label">Push hard &amp; fast: centre of chest, 5–6 cm</div>
+    <div id="metro-count" class="metro-count">0</div>
+    <div id="metro-prompt" class="metro-prompt">&nbsp;</div>
+    <label class="metro-opt"><input type="checkbox" id="metro-handsonly" checked> Hands-only (no breaths)</label>
+    <div class="metro-bpm">110 per minute · <span id="metro-time">0:00</span></div>
+    <button id="metro-stop" class="btn big">Stop</button>
+  </div>
+</div>
+
+<script src="content.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
