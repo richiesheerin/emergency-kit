@@ -327,6 +327,16 @@ function guideView(id) {
   const sibs = GUIDES.filter((x) => x.cat === g.cat), i = sibs.indexOf(g), next = sibs[i + 1];
   return `<div class="crumb"><a href="#cat/${g.cat}">${catById[g.cat].title}</a></div>
     <h2>${g.title}</h2>${g.body}
+    <div class="panel ask" id="ask-ai" data-guide="${g.id}">
+      <h3>Ask AI about this</h3>
+      <p class="small">Sends this guide plus your question to your offline AI app (e.g. PocketPal), so it answers from this checked text instead of from memory.</p>
+      <textarea class="f" id="ask-q" placeholder="Your question (optional), e.g. “What if they're a child?”"></textarea>
+      <div class="row" style="margin-top:8px">
+        ${navigator.share ? `<button class="btn red" id="ask-share">Share to AI app</button>` : ""}
+        <button class="btn${navigator.share ? "" : " red"}" id="ask-copy">Copy for AI</button>
+      </div>
+      <p class="small" id="ask-msg"></p>
+    </div>
     ${next ? `<a class="card" style="margin-top:20px" href="#g/${next.id}"><span>Next</span><b>${next.title}</b></a>` : ""}`;
 }
 
@@ -448,6 +458,7 @@ function wire() {
   const cb = $("#cpr-btn"); if (cb) cb.onclick = startMetronome;
 
   wirePdf();
+  wireAsk();
 
   const form = $("#med-form");
   if (form) form.onsubmit = (e) => {
@@ -456,6 +467,61 @@ function wire() {
     for (const k in data) data[k] = data[k].trim();
     if (!store.set("medical", data)) alert("Couldn't save (private browsing?).");
     render();
+  };
+}
+
+// ---------- Ask AI: hand a guide to an offline AI app ----------
+function guideText(g) {
+  const root = document.createElement("div");
+  root.innerHTML = g.body;
+  root.querySelectorAll("a.btn, #morse-table").forEach((el) => el.remove());
+  const out = [];
+  const walk = (el) => {
+    for (const n of el.childNodes) {
+      if (n.nodeType === 3) { const t = n.textContent.replace(/\s+/g, " "); if (t.trim()) out.push(t); continue; }
+      if (n.nodeType !== 1) continue;
+      const tag = n.tagName;
+      if (tag === "H3") { out.push(`\n\n${n.textContent.trim().toUpperCase()}\n`); continue; }
+      if (tag === "LI") {
+        const parent = n.parentElement, idx = [...parent.children].indexOf(n) + 1;
+        out.push(`\n${parent.tagName === "OL" ? idx + "." : "-"} `); walk(n); continue;
+      }
+      if (tag === "TR") { out.push("\n- " + [...n.children].map((c) => c.textContent.trim()).join(" | ")); continue; }
+      if (["P", "DIV", "UL", "OL", "TABLE"].includes(tag)) { out.push("\n"); walk(n); out.push("\n"); continue; }
+      walk(n);
+    }
+  };
+  walk(root);
+  return out.join("").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/^ +/gm, "").trim();
+}
+function askPrompt(g, q) {
+  return [
+    "Answer using ONLY the emergency guide below. Give short numbered steps. If the guide doesn't cover the question, say so and give the safest option. If life is at risk, start with: call 112.",
+    "",
+    `QUESTION: ${q || "Summarise the key steps from this guide."}`,
+    "",
+    `GUIDE: ${g.title}`,
+    guideText(g),
+  ].join("\n");
+}
+function wireAsk() {
+  const box = $("#ask-ai"); if (!box) return;
+  const g = byId[box.dataset.guide], msg = $("#ask-msg");
+  const text = () => askPrompt(g, $("#ask-q").value.trim());
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text()); }
+    catch {
+      const ta = document.createElement("textarea"); ta.value = text(); document.body.appendChild(ta);
+      ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch {} ta.remove();
+      if (!ok) { msg.textContent = "Couldn't copy on this browser."; return; }
+    }
+    msg.innerHTML = "<b>Copied.</b> Open PocketPal → your SOS chat → long-press the message box → Paste → Send.";
+  };
+  $("#ask-copy").onclick = copy;
+  const sh = $("#ask-share");
+  if (sh) sh.onclick = async () => {
+    try { await navigator.share({ title: g.title, text: text() }); msg.textContent = "If PocketPal wasn't in the list, use Copy for AI instead."; }
+    catch (e) { if (e && e.name !== "AbortError") copy(); }
   };
 }
 

@@ -120,6 +120,8 @@ input.f, textarea.f, select.f {
 textarea.f { min-height: 70px; }
 .medcard dt { color: var(--muted); font-size: .85rem; margin-top: 8px; }
 .medcard dd { margin: 0; font-size: 1.1rem; font-weight: 600; }
+.panel.ask { margin-top: 24px; border-color: #3d3d6b; }
+.panel.ask h3 { color: #9fa8ff; }
 .footer { color: var(--muted); font-size: .85rem; margin-top: 28px; }
 
 .tabs {
